@@ -1,0 +1,8 @@
+server:
+  port: 9001 # each Polar service gets its own port
+  tomcat:
+    connection-timeout: 2s # max wait between TCP accept and the HTTP request
+    keep-alive-timeout: 15s # how long an idle connection stays open
+    threads:
+      max: 50 # upper bound on concurrent requests
+      min-spare: 5 # threads kept alive (and created at startup)
