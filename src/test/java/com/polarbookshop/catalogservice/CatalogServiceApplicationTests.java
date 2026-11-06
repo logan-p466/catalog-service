@@ -29,4 +29,42 @@ class CatalogServiceApplicationTests {
 				});
 	}
 
+
+	// new test for put new book 201
+	@Test
+	void whenPutNewBookThenShouldReturn201() {
+		var book = new Book("9780306406157", "New Book", "Author", 9.90);
+
+		webTestClient
+				.put().uri("/books/" + book.isbn())
+				.bodyValue(book)
+				.exchange()
+				.expectStatus().isCreated()
+				.expectBody(Book.class)
+				.value(actual -> assertThat(actual).isEqualTo(book));
+	}
+
+
+	// new test for put on existing book for update 200
+	@Test
+	void whenPutExistingBookThenShouldReturn200() {
+		var original = new Book("9780131103627", "Original Title", "Author", 9.90);
+
+		webTestClient
+				.post().uri("/books")
+				.bodyValue(original)
+				.exchange()
+				.expectStatus().isCreated();
+
+		var updated = new Book("9780131103627", "Updated Title", "Author", 12.50);
+
+		webTestClient
+				.put().uri("/books/" + updated.isbn())
+				.bodyValue(updated)
+				.exchange()
+				.expectStatus().isOk()
+				.expectBody(Book.class)
+				.value(actual -> assertThat(actual).isEqualTo(updated));
+	}
+
 }

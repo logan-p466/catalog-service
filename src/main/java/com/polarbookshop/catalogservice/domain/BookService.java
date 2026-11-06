@@ -41,4 +41,8 @@ public class BookService {
                 })
                 .orElseGet(() -> addBookToCatalog(book));
     }
+
+    public boolean bookExists(String isbn) {
+        return bookRepository.existsByIsbn(isbn);
+    }
 }

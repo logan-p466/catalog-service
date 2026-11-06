@@ -39,7 +39,18 @@ public class BookController {
         bookService.removeBookFromCatalog(isbn);
     }
 
+
+    // update put to distinguish edit vs create
     @PutMapping("{isbn}")
-    public Book put(@PathVariable String isbn, @Valid @RequestBody Book book) {
-        return bookService.editBookDetails(isbn, book);    }
+    public ResponseEntity<Book> put(@PathVariable String isbn, @Valid @RequestBody Book book) {
+        boolean exists = bookService.bookExists(isbn);
+
+        Book savedBook = bookService.editBookDetails(isbn, book);
+
+        if (exists) {
+            return ResponseEntity.ok(savedBook);
+        } else {
+            return ResponseEntity.status(HttpStatus.CREATED).body(savedBook);
+        }
+    }
 }
