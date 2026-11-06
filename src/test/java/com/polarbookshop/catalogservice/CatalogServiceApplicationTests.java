@@ -67,4 +67,16 @@ class CatalogServiceApplicationTests {
 				.value(actual -> assertThat(actual).isEqualTo(updated));
 	}
 
+	// new test for mismatched isbn
+	@Test
+	void whenPutWithMismatchedIsbnThenShouldReturn400() {
+		var book = new Book("9780306406157", "Title", "Author", 9.90);
+
+		webTestClient
+				.put().uri("/books/9780131103627")
+				.bodyValue(book)
+				.exchange()
+				.expectStatus().isBadRequest();
+	}
+
 }

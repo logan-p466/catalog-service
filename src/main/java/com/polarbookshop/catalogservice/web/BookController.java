@@ -6,6 +6,7 @@ import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 @RestController
 @RequestMapping("books")
@@ -41,10 +42,17 @@ public class BookController {
 
 
     // update put to distinguish edit vs create
+    // updated to add ISBN check before calling bookService
     @PutMapping("{isbn}")
     public ResponseEntity<Book> put(@PathVariable String isbn, @Valid @RequestBody Book book) {
-        boolean exists = bookService.bookExists(isbn);
+        if (!isbn.equals(book.isbn())) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "The ISBN in the URL must match the ISBN in the request body."
+            );
+        }
 
+        boolean exists = bookService.bookExists(isbn);
         Book savedBook = bookService.editBookDetails(isbn, book);
 
         if (exists) {

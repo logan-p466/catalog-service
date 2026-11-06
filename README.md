@@ -33,3 +33,9 @@ The API runs at `http://localhost:9001`.
 ## API Documentation
 
 See [API Demonstration](docs/api-demo.md) for example HTTP requests and responses.
+
+## E2: PUT ISBN Mismatch Policy
+
+For PUT requests, the ISBN in the URL must match the ISBN in the request body. If they differ, the API returns HTTP 400 Bad Request without modifying the catalog.
+
+This prevents ambiguity about which book should be created or updated and ensures that the URL identifies the resource being modified.
