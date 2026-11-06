@@ -39,3 +39,7 @@ See [API Demonstration](docs/api-demo.md) for example HTTP requests and response
 For PUT requests, the ISBN in the URL must match the ISBN in the request body. If they differ, the API returns HTTP 400 Bad Request without modifying the catalog.
 
 This prevents ambiguity about which book should be created or updated and ensures that the URL identifies the resource being modified.
+
+## E4: DELETE Idempotency
+
+Returning HTTP 204 No Content when deleting a nonexistent book is consistent with HTTP idempotency. An operation is idempotent when repeating it has the same intended effect on the server as performing it once. Whether the book exists before the DELETE request or has already been removed, the resulting state is the same: the book no longer exists. Idempotency does not require identical HTTP response codes across repeated requests.
