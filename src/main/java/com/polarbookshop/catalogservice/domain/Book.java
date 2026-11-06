@@ -2,14 +2,13 @@ package com.polarbookshop.catalogservice.domain;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Positive;
 
 public record Book (
+    // new isbn validation
     @NotBlank(message = "The book ISBN must be defined.")
-    @Pattern(regexp = "^([0-9]{10}|[0-9]{13})$",
-            message = "The ISBN format must be valid.")
-    String isbn, // unique identifier
+    @ValidIsbn
+    String isbn,
 
     @NotBlank(message = "The title must be defined.")
     String title,

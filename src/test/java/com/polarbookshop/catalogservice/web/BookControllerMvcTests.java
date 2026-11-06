@@ -41,14 +41,14 @@ public class BookControllerMvcTests {
     // 422, duplicate ISBN
     @Test
     void whenPostBookAlreadyExistsThenShouldReturn422() throws Exception {
-        String isbn = "1234567890";
+        String isbn = "0306406152";
 
         given(bookService.addBookToCatalog(any(Book.class)))
             .willThrow(new BookAlreadyExistsException(isbn));
 
         String json = """
                 {
-                    "isbn": "1234567890",
+                    "isbn": "0306406152",
                     "title": "Title",
                     "author": "Author",
                     "price": 9.90
@@ -66,7 +66,7 @@ public class BookControllerMvcTests {
     void whenPostBookInvalidThenShouldReturn400() throws Exception {
         String json = """
                 {
-                    "isbn": "1234567890",
+                    "isbn": "0306406152",
                     "title": "",
                     "author": "Author",
                     "price": 9.90
