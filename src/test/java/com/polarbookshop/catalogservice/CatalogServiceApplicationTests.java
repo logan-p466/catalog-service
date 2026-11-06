@@ -79,4 +79,50 @@ class CatalogServiceApplicationTests {
 				.expectStatus().isBadRequest();
 	}
 
+	// E4 Full Book Lifecycle Integration Test
+	@Test
+	void whenBookLifecycleCompletedThenShouldReturnCorrectStatuses() {
+		String isbn = "9780201633610";
+		var original = new Book(isbn, "Original Title", "Author", 9.90);
+
+		// 1. POST: Create the book (201)
+		webTestClient
+				.post().uri("/books")
+				.bodyValue(original)
+				.exchange()
+				.expectStatus().isCreated();
+
+		// 2. GET: Verify the book exists (200)
+		webTestClient
+				.get().uri("/books/" + isbn)
+				.exchange()
+				.expectStatus().isOk()
+				.expectBody(Book.class)
+				.value(actual -> assertThat(actual).isEqualTo(original));
+
+		// 3. PUT: Update the book (200)
+		var updated = new Book(isbn, "Updated Title", "Author", 12.50);
+
+		webTestClient
+				.put().uri("/books/" + isbn)
+				.bodyValue(updated)
+				.exchange()
+				.expectStatus().isOk()
+				.expectBody(Book.class)
+				.value(actual -> assertThat(actual).isEqualTo(updated));
+
+		// 4. DELETE: Remove the book (204)
+		webTestClient
+				.delete().uri("/books/" + isbn)
+				.exchange()
+				.expectStatus().isNoContent();
+
+		// 5. GET: Verify the book no longer exists (404)
+		webTestClient
+				.get().uri("/books/" + isbn)
+				.exchange()
+				.expectStatus().isNotFound();
+	}
+
+
 }
