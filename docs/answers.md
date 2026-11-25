@@ -23,3 +23,4 @@ The @WebMvcTest annotation is beneficial because it loads only the web layer, re
 ## 6.
 
 The commit stage should be designed to be quick so developers can get their feedback promptly after code is pushed, allowing them to address any issues before moving forward. If a test slows down the process and exceeds the time limits, it needs to be optimized or potentially moved to a different testing phase, such as a later integration-test pipeline. The focus during the commit stage should remain on fast, essential checks that can catch common issues without delaying feedback too much.
+
