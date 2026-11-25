@@ -28,14 +28,16 @@ public class BookDataLoader {
                 "9780140328721",
                 "Northern Lights",
                 "Lyra Silverstar",
-                9.90
+                9.90,
+                "Polar Publishing"
         );
 
         var book2 = Book.of(
                 "9780140449136",
                 "Polar Journey",
                 "Iorek Polarson",
-                12.90
+                12.90,
+                "Polar Publishing"
         );
 
         bookRepository.saveAll(List.of(book1, book2));

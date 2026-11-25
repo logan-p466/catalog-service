@@ -43,3 +43,23 @@ This prevents ambiguity about which book should be created or updated and ensure
 ## E4: DELETE Idempotency
 
 Returning HTTP 204 No Content when deleting a nonexistent book is consistent with HTTP idempotency. An operation is idempotent when repeating it has the same intended effect on the server as performing it once. Whether the book exists before the DELETE request or has already been removed, the resulting state is the same: the book no longer exists. Idempotency does not require identical HTTP response codes across repeated requests.
+
+
+## Practicum 2 E1: Publisher Schema Evolution
+
+The publisher column is nullable in this release because existing books do not
+have publisher information, and older instances of Catalog Service do not
+provide a publisher when inserting new books. Making the column mandatory
+immediately could cause older application instances to fail.
+
+In the first release, a Flyway migration adds the nullable publisher column.
+The updated application supports reading and writing publisher information
+while remaining compatible with older instances.
+
+Before the second release, all older instances are retired, new writes are
+required to include a publisher, and existing rows with missing publishers
+are backfilled. A subsequent Flyway migration can then add a NOT NULL
+constraint to the publisher column.
+
+This allows the database schema to evolve without requiring all application
+instances to be updated at the same time.

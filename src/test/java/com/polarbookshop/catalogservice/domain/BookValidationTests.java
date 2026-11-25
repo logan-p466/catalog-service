@@ -20,14 +20,14 @@ class BookValidationTests {
 
     @Test
     void whenAllFieldsCorrectThenValidationSucceeds() {
-        var book = Book.of("0306406152", "Title", "Author", 9.90);
+        var book = Book.of("0306406152", "Title", "Author", 9.90, null);
         Set<ConstraintViolation<Book>> violations = validator.validate(book);
         assertThat(violations).isEmpty();
     }
 
     @Test
     void whenIsbnDefinedButIncorrectThenValidationFails() {
-        var book = Book.of("a234567890", "Title", "Author", 9.90);
+        var book = Book.of("a234567890", "Title", "Author", 9.90, null);
         Set<ConstraintViolation<Book>> violations = validator.validate(book);
         assertThat(violations).hasSize(1);
         assertThat(violations.iterator().next().getMessage())
@@ -36,7 +36,7 @@ class BookValidationTests {
 
     @Test
     void whenTitleBlankThenValidationFails() {
-        var book = Book.of("0306406152", "", "Author", 9.90);
+        var book = Book.of("0306406152", "", "Author", 9.90, null);
 
         Set<ConstraintViolation<Book>> violations = validator.validate(book);
 
@@ -47,7 +47,7 @@ class BookValidationTests {
 
     @Test
     void whenAuthorBlankThenValidationFails() {
-        var book = Book.of("0306406152", "Title", "", 9.90);
+        var book = Book.of("0306406152", "Title", "", 9.90, null);
 
         Set<ConstraintViolation<Book>> violations = validator.validate(book);
 
@@ -58,7 +58,7 @@ class BookValidationTests {
 
     @Test
     void whenPriceMissingThenValidationFails() {
-        var book = Book.of("0306406152", "Title", "Author", null);
+        var book = Book.of("0306406152", "Title", "Author", null, null);
 
         Set<ConstraintViolation<Book>> violations = validator.validate(book);
 
@@ -69,7 +69,7 @@ class BookValidationTests {
 
     @Test
     void whenPriceZeroThenValidationFails() {
-        var book = Book.of("0306406152", "Title", "Author", 0.0);
+        var book = Book.of("0306406152", "Title", "Author", 0.0, null);
 
         Set<ConstraintViolation<Book>> violations = validator.validate(book);
 
@@ -81,21 +81,21 @@ class BookValidationTests {
     // new tests for ISBN
     @Test
     void whenIsbn10ValidThenValidationSucceeds() {
-        var book = Book.of("0306406152", "Title", "Author", 9.90);
+        var book = Book.of("0306406152", "Title", "Author", 9.90, null);
 
         assertThat(validator.validate(book)).isEmpty();
     }
 
     @Test
     void whenIsbn10EndsWithXThenValidationSucceeds() {
-        var book = Book.of("080442957X", "Title", "Author", 9.90);
+        var book = Book.of("080442957X", "Title", "Author", 9.90, null);
 
         assertThat(validator.validate(book)).isEmpty();
     }
 
     @Test
     void whenIsbn10CheckDigitIncorrectThenValidationFails() {
-        var book = Book.of("0306406153", "Title", "Author", 9.90);
+        var book = Book.of("0306406153", "Title", "Author", 9.90, null);
 
         var violations = validator.validate(book);
 
@@ -106,7 +106,7 @@ class BookValidationTests {
 
     @Test
     void whenIsbn13CheckDigitIncorrectThenValidationFails() {
-        var book = Book.of("9780306406158", "Title", "Author", 9.90);
+        var book = Book.of("9780306406158", "Title", "Author", 9.90, null);
 
         var violations = validator.validate(book);
 

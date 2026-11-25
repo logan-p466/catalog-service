@@ -31,7 +31,7 @@ class BookRepositoryJdbcTests {
     @Test
     void findBookByIsbnWhenExisting() {
         var isbn = "0306406152";
-        var book = Book.of(isbn, "Title", "Author", 12.90);
+        var book = Book.of(isbn, "Title", "Author", 12.90, null);
 
         jdbcAggregateTemplate.insert(book);
 
@@ -49,8 +49,8 @@ class BookRepositoryJdbcTests {
 
     @Test
     void findAllBooks() {
-        var book1 = Book.of("0306406152", "Title One", "Author", 9.90);
-        var book2 = Book.of("9780306406157", "Title Two", "Author", 12.90);
+        var book1 = Book.of("0306406152", "Title One", "Author", 9.90, null);
+        var book2 = Book.of("9780306406157", "Title Two", "Author", 12.90, null);
 
         jdbcAggregateTemplate.insert(book1);
         jdbcAggregateTemplate.insert(book2);
@@ -63,7 +63,7 @@ class BookRepositoryJdbcTests {
     @Test
     void existsByIsbnWhenExisting() {
         var isbn = "0306406152";
-        var book = Book.of(isbn, "Title", "Author", 9.90);
+        var book = Book.of(isbn, "Title", "Author", 9.90, null);
 
         jdbcAggregateTemplate.insert(book);
 
@@ -79,7 +79,7 @@ class BookRepositoryJdbcTests {
     @Test
     void deleteByIsbnWhenExisting() {
         var isbn = "0306406152";
-        var book = Book.of(isbn, "Title", "Author", 9.90);
+        var book = Book.of(isbn, "Title", "Author", 9.90, null);
 
         jdbcAggregateTemplate.insert(book);
 
@@ -90,10 +90,49 @@ class BookRepositoryJdbcTests {
 
     @Test
     void whenBookSavedThenCreatedDateIsSet() {
-        var book = Book.of("0306406152", "Title", "Author", 9.90);
+        var book = Book.of("0306406152", "Title", "Author", 9.90, null);
 
         var savedBook = bookRepository.save(book);
 
         assertThat(savedBook.createdDate()).isNotNull();
     }
+
+
+    @Test
+    void whenPublisherDefinedThenPublisherIsPersisted() {
+        var book = Book.of(
+                "0306406152",
+                "Title",
+                "Author",
+                9.90,
+                "Polar Publishing"
+        );
+
+        bookRepository.save(book);
+
+        var actual = bookRepository.findByIsbn(book.isbn());
+
+        assertThat(actual).isPresent();
+        assertThat(actual.get().publisher())
+                .isEqualTo("Polar Publishing");
+    }
+
+    @Test
+    void whenPublisherMissingThenBookIsStillPersisted() {
+        var book = Book.of(
+                "0306406152",
+                "Title",
+                "Author",
+                9.90,
+                null
+        );
+
+        bookRepository.save(book);
+
+        var actual = bookRepository.findByIsbn(book.isbn());
+
+        assertThat(actual).isPresent();
+        assertThat(actual.get().publisher()).isNull();
+    }
+
 }

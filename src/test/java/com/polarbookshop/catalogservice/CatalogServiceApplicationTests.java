@@ -34,6 +34,7 @@ class CatalogServiceApplicationTests {
 		assertThat(actual.title()).isEqualTo(expected.title());
 		assertThat(actual.author()).isEqualTo(expected.author());
 		assertThat(actual.price()).isEqualTo(expected.price());
+		assertThat(actual.publisher()).isEqualTo(expected.publisher());
 		assertThat(actual.id()).isNotNull();
 		assertThat(actual.createdDate()).isNotNull();
 		assertThat(actual.lastModifiedDate()).isNotNull();
@@ -41,7 +42,7 @@ class CatalogServiceApplicationTests {
 
 	@Test
 	void whenPostRequestThenBookCreated() {
-		var expected = Book.of("0306406152", "Title", "Author", 9.90);
+		var expected = Book.of("0306406152", "Title", "Author", 9.90, null);
 
 		webTestClient
 				.post().uri("/books")
@@ -54,7 +55,7 @@ class CatalogServiceApplicationTests {
 
 	@Test
 	void whenPutNewBookThenShouldReturn201() {
-		var book = Book.of("9780306406157", "New Book", "Author", 9.90);
+		var book = Book.of("9780306406157", "New Book", "Author", 9.90, null);
 
 		webTestClient
 				.put().uri("/books/" + book.isbn())
@@ -67,7 +68,7 @@ class CatalogServiceApplicationTests {
 
 	@Test
 	void whenPutExistingBookThenShouldReturn200() {
-		var original = Book.of("9780131103627", "Original Title", "Author", 9.90);
+		var original = Book.of("9780131103627", "Original Title", "Author", 9.90, null);
 
 		webTestClient
 				.post().uri("/books")
@@ -75,7 +76,7 @@ class CatalogServiceApplicationTests {
 				.exchange()
 				.expectStatus().isCreated();
 
-		var updated = Book.of("9780131103627", "Updated Title", "Author", 12.50);
+		var updated = Book.of("9780131103627", "Updated Title", "Author", 12.50, null);
 
 		webTestClient
 				.put().uri("/books/" + updated.isbn())
@@ -88,7 +89,7 @@ class CatalogServiceApplicationTests {
 
 	@Test
 	void whenPutWithMismatchedIsbnThenShouldReturn400() {
-		var book = Book.of("9780306406157", "Title", "Author", 9.90);
+		var book = Book.of("9780306406157", "Title", "Author", 9.90, null);
 
 		webTestClient
 				.put().uri("/books/9780131103627")
@@ -100,8 +101,7 @@ class CatalogServiceApplicationTests {
 	@Test
 	void whenBookLifecycleCompletedThenShouldReturnCorrectStatuses() {
 		String isbn = "9780201633610";
-		var original = Book.of(isbn, "Original Title", "Author", 9.90);
-
+		var original = Book.of(isbn, "Original Title", "Author", 9.90, "Polar Publishing");
 		// POST: Create the book
 		webTestClient
 				.post().uri("/books")
@@ -118,8 +118,7 @@ class CatalogServiceApplicationTests {
 				.value(actual -> assertBookDetails(actual, original));
 
 		// PUT: Update the book
-		var updated = Book.of(isbn, "Updated Title", "Author", 12.50);
-
+		var updated = Book.of(isbn, "Updated Title", "Author", 12.50, "Updated Publisher");
 		webTestClient
 				.put().uri("/books/" + isbn)
 				.bodyValue(updated)
