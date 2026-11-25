@@ -7,5 +7,16 @@ server:
       max: 50 # upper bound on concurrent requests
       min-spare: 5 # threads kept alive (and created at startup)
 
+spring:
+  application:
+    name: catalog-service
+  datasource:
+    url: jdbc:postgresql://localhost:5432/polardb_catalog
+    username: user # development defaults only:
+    password: password # override via SPRING_DATASOURCE_* in real environments
+    hikari:
+      connection-timeout: 2000 # ms to wait for a free connection
+      maximum-pool-size: 5 # connections kept open and reused
+
 polar:
   greeting: Welcome to the local book catalog!

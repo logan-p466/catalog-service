@@ -4,9 +4,9 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class BookService {
+
     private final BookRepository bookRepository;
 
-    // constructor injection: the dependency is required, final, and never null
     public BookService(BookRepository bookRepository) {
         this.bookRepository = bookRepository;
     }
@@ -20,10 +20,15 @@ public class BookService {
                 .orElseThrow(() -> new BookNotFoundException(isbn));
     }
 
+    public boolean bookExists(String isbn) {
+        return bookRepository.existsByIsbn(isbn);
+    }
+
     public Book addBookToCatalog(Book book) {
         if (bookRepository.existsByIsbn(book.isbn())) {
             throw new BookAlreadyExistsException(book.isbn());
         }
+
         return bookRepository.save(book);
     }
 
@@ -34,15 +39,19 @@ public class BookService {
     public Book editBookDetails(String isbn, Book book) {
         return bookRepository.findByIsbn(isbn)
                 .map(existing -> {
-                    //everything may change except the identifier
-                    var updated = new Book(existing.isbn(),
-                            book.title(), book.author(), book.price());
+                    var updated = new Book(
+                            existing.id(),
+                            existing.isbn(),
+                            book.title(),
+                            book.author(),
+                            book.price(),
+                            existing.createdDate(),
+                            existing.lastModifiedDate(),
+                            existing.version()
+                    );
+
                     return bookRepository.save(updated);
                 })
                 .orElseGet(() -> addBookToCatalog(book));
-    }
-
-    public boolean bookExists(String isbn) {
-        return bookRepository.existsByIsbn(isbn);
     }
 }
