@@ -1,18 +1,43 @@
 package com.polarbookshop.catalogservice;
 
 import com.polarbookshop.catalogservice.domain.Book;
+import com.polarbookshop.catalogservice.domain.BookRepository;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.reactive.server.WebTestClient;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+
+
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@ActiveProfiles("integration")
 class CatalogServiceApplicationTests {
 
 	@Autowired
 	private WebTestClient webTestClient;
+
+	@Autowired
+	private BookRepository bookRepository;
+
+	@AfterEach
+	void cleanUp() {
+		bookRepository.deleteAll();
+	}
+
+	private void assertBookDetails(Book actual, Book expected) {
+		assertThat(actual).isNotNull();
+		assertThat(actual.isbn()).isEqualTo(expected.isbn());
+		assertThat(actual.title()).isEqualTo(expected.title());
+		assertThat(actual.author()).isEqualTo(expected.author());
+		assertThat(actual.price()).isEqualTo(expected.price());
+		assertThat(actual.id()).isNotNull();
+		assertThat(actual.createdDate()).isNotNull();
+		assertThat(actual.lastModifiedDate()).isNotNull();
+	}
 
 	@Test
 	void whenPostRequestThenBookCreated() {
@@ -23,14 +48,10 @@ class CatalogServiceApplicationTests {
 				.bodyValue(expected)
 				.exchange()
 				.expectStatus().isCreated()
-				.expectBody(Book.class).value(actual -> {
-					assertThat(actual).isNotNull();
-					assertThat(actual.isbn()).isEqualTo(expected.isbn());
-				});
+				.expectBody(Book.class)
+				.value(actual -> assertBookDetails(actual, expected));
 	}
 
-
-	// new test for put new book 201
 	@Test
 	void whenPutNewBookThenShouldReturn201() {
 		var book = Book.of("9780306406157", "New Book", "Author", 9.90);
@@ -41,11 +62,9 @@ class CatalogServiceApplicationTests {
 				.exchange()
 				.expectStatus().isCreated()
 				.expectBody(Book.class)
-				.value(actual -> assertThat(actual).isEqualTo(book));
+				.value(actual -> assertBookDetails(actual, book));
 	}
 
-
-	// new test for put on existing book for update 200
 	@Test
 	void whenPutExistingBookThenShouldReturn200() {
 		var original = Book.of("9780131103627", "Original Title", "Author", 9.90);
@@ -64,10 +83,9 @@ class CatalogServiceApplicationTests {
 				.exchange()
 				.expectStatus().isOk()
 				.expectBody(Book.class)
-				.value(actual -> assertThat(actual).isEqualTo(updated));
+				.value(actual -> assertBookDetails(actual, updated));
 	}
 
-	// new test for mismatched isbn
 	@Test
 	void whenPutWithMismatchedIsbnThenShouldReturn400() {
 		var book = Book.of("9780306406157", "Title", "Author", 9.90);
@@ -79,28 +97,27 @@ class CatalogServiceApplicationTests {
 				.expectStatus().isBadRequest();
 	}
 
-	// E4 Full Book Lifecycle Integration Test
 	@Test
 	void whenBookLifecycleCompletedThenShouldReturnCorrectStatuses() {
 		String isbn = "9780201633610";
 		var original = Book.of(isbn, "Original Title", "Author", 9.90);
 
-		// 1. POST: Create the book (201)
+		// POST: Create the book
 		webTestClient
 				.post().uri("/books")
 				.bodyValue(original)
 				.exchange()
 				.expectStatus().isCreated();
 
-		// 2. GET: Verify the book exists (200)
+		// GET: Retrieve the book
 		webTestClient
 				.get().uri("/books/" + isbn)
 				.exchange()
 				.expectStatus().isOk()
 				.expectBody(Book.class)
-				.value(actual -> assertThat(actual).isEqualTo(original));
+				.value(actual -> assertBookDetails(actual, original));
 
-		// 3. PUT: Update the book (200)
+		// PUT: Update the book
 		var updated = Book.of(isbn, "Updated Title", "Author", 12.50);
 
 		webTestClient
@@ -109,20 +126,18 @@ class CatalogServiceApplicationTests {
 				.exchange()
 				.expectStatus().isOk()
 				.expectBody(Book.class)
-				.value(actual -> assertThat(actual).isEqualTo(updated));
+				.value(actual -> assertBookDetails(actual, updated));
 
-		// 4. DELETE: Remove the book (204)
+		// DELETE: Remove the book
 		webTestClient
 				.delete().uri("/books/" + isbn)
 				.exchange()
 				.expectStatus().isNoContent();
 
-		// 5. GET: Verify the book no longer exists (404)
+		// GET: Verify the book no longer exists
 		webTestClient
 				.get().uri("/books/" + isbn)
 				.exchange()
 				.expectStatus().isNotFound();
 	}
-
-
 }
