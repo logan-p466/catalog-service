@@ -70,6 +70,7 @@ Flyway automatically applies pending database migrations at startup.
 - [API Demonstration](docs/api-demo.md)
 - [Configuration Demonstration](docs/config-demo.md)
 - [Practicum 1 Bonus Questions](docs/answers.md)
+- [Practicum 2 Bonus Questions](docs/answers-p2.md)
 
 ## E2: PUT ISBN Mismatch Policy
 
