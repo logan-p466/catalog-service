@@ -6,19 +6,43 @@ A REST API for managing a book catalog, developed with Java 21 and Spring Boot 3
 
 - Create, retrieve, update, and delete books using REST endpoints.
 - Validate book information using Jakarta Bean Validation.
-- Store books in an in-memory repository.
-- Test application behavior with JUnit, MockMvc, and Spring Boot Test.
+- Search for books by author.
+- Store books in PostgreSQL using Spring Data JDBC.
+- Manage database schema changes using Flyway.
+- Track creation dates, modification dates, and versions.
+- Configure application properties externally without rebuilding.
+- Enable sample data through a configurable feature flag.
+- Test application behavior with JUnit, MockMvc, Spring Boot Test, and Testcontainers.
 - Build and test automatically using GitHub Actions.
 
 ## Running the Application
 
-Build the project:
+### Prerequisites
+
+- Java 21
+- Docker Desktop or Docker Engine
+
+### Start PostgreSQL
+
+Create the PostgreSQL container:
 
 ```powershell
-.\gradlew.bat build
+docker run -d --name polar-postgres -e POSTGRES_USER=user -e POSTGRES_PASSWORD=password -e POSTGRES_DB=polardb_catalog -p 5432:5432 postgres:17
 ```
 
-Start the application:
+If the container already exists, start it instead:
+
+```powershell
+docker start polar-postgres
+```
+
+### Build the Project
+
+```powershell
+.\gradlew.bat clean build
+```
+
+### Run the Application
 
 ```powershell
 .\gradlew.bat bootRun
@@ -26,13 +50,26 @@ Start the application:
 
 The API runs at `http://localhost:9001`.
 
+The `bootRun` task enables the test-data loader, which clears existing books and inserts sample data at startup.
+
+To run the application without resetting the catalog, build and run the packaged JAR:
+
+```powershell
+.\gradlew.bat bootJar
+java -jar build/libs/catalog-service-0.0.1-SNAPSHOT.jar
+```
+
+Flyway automatically applies pending database migrations at startup.
+
 ## CI Status
 
 [![Commit Stage](https://github.com/logan-p466/catalog-service/actions/workflows/commit-stage.yml/badge.svg)](https://github.com/logan-p466/catalog-service/actions/workflows/commit-stage.yml)
 
-## API Documentation
+## Documentation
 
-See [API Demonstration](docs/api-demo.md) for example HTTP requests and responses.
+- [API Demonstration](docs/api-demo.md)
+- [Configuration Demonstration](docs/config-demo.md)
+- [Practicum 1 Bonus Questions](docs/answers.md)
 
 ## E2: PUT ISBN Mismatch Policy
 
@@ -75,3 +112,17 @@ If an author has no matching books, the endpoint returns an empty list
 with HTTP 200 OK.
 
 Author filtering is tested at both the repository and web layers.
+
+## Practicum 2 E3: Feature Flag Without Profiles
+
+The test-data loader uses @ConditionalOnProperty instead of
+@Profile to control whether sample data is loaded.
+
+The polar.testdata.enabled property defaults to false in
+application.yml. The bootRun task enables it for local development.
+
+The feature can also be enabled on the packaged JAR using the
+POLAR_TESTDATA_ENABLED environment variable without rebuilding
+the application.
+
+See docs/config-demo.md for the demonstration.
