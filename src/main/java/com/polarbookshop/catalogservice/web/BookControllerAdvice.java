@@ -12,6 +12,8 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
+import org.springframework.dao.OptimisticLockingFailureException;
+
 @RestControllerAdvice
 public class BookControllerAdvice {
 
@@ -36,5 +38,11 @@ public class BookControllerAdvice {
             errors.put(field, error.getDefaultMessage());
         });
         return errors;
+    }
+
+    @ExceptionHandler(OptimisticLockingFailureException.class)
+    @ResponseStatus(HttpStatus.CONFLICT)
+    String optimisticLockingHandler(OptimisticLockingFailureException ex) {
+        return "The book was modified by another request. Please try again.";
     }
 }

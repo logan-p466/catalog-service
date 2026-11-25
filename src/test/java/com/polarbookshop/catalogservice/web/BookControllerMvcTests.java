@@ -23,6 +23,10 @@ import java.util.List;
 
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 
+import org.springframework.dao.OptimisticLockingFailureException;
+
+import static org.mockito.ArgumentMatchers.eq;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 
 @WebMvcTest(BookController.class)
 public class BookControllerMvcTests {
@@ -133,5 +137,34 @@ public class BookControllerMvcTests {
                 .andExpect(jsonPath("$.length()").value(2));
     }
 
+
+
+    @Test
+    void whenPutBookWithOptimisticLockingFailureThenShouldReturn409() throws Exception {
+        String isbn = "0306406152";
+
+        given(bookService.bookExists(isbn))
+                .willReturn(true);
+
+        given(bookService.editBookDetails(eq(isbn), any(Book.class)))
+                .willThrow(new OptimisticLockingFailureException(
+                        "The book has already been modified."
+                ));
+
+        String json = """
+            {
+                "isbn": "0306406152",
+                "title": "Updated Title",
+                "author": "Author",
+                "price": 9.90,
+                "publisher": "Polar Publishing"
+            }
+            """;
+
+        mockMvc.perform(put("/books/" + isbn)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(json))
+                .andExpect(status().isConflict());
+    }
 
 }

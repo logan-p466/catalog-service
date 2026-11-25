@@ -14,6 +14,10 @@ import org.springframework.test.context.ActiveProfiles;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import org.springframework.dao.OptimisticLockingFailureException;
+
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+
 @DataJdbcTest
 @Import(DataConfig.class)
 @AutoConfigureTestDatabase(
@@ -175,6 +179,58 @@ class BookRepositoryJdbcTests {
     void findBooksByAuthorWhenNotExisting() {
         assertThat(bookRepository.findByAuthor("Unknown Author"))
                 .isEmpty();
+    }
+
+
+    @Test
+    void whenSavingStaleBookThenOptimisticLockingFails() {
+        var book = Book.of(
+                "0306406152",
+                "Original Title",
+                "Author",
+                9.90,
+                "Polar Publishing"
+        );
+
+        jdbcAggregateTemplate.insert(book);
+
+        var firstCopy = bookRepository.findByIsbn(book.isbn())
+                .orElseThrow();
+
+        var secondCopy = bookRepository.findByIsbn(book.isbn())
+                .orElseThrow();
+
+        var firstUpdate = new Book(
+                firstCopy.id(),
+                firstCopy.isbn(),
+                "First Updated Title",
+                firstCopy.author(),
+                firstCopy.price(),
+                firstCopy.publisher(),
+                firstCopy.createdDate(),
+                firstCopy.lastModifiedDate(),
+                firstCopy.version()
+        );
+
+        var savedBook = bookRepository.save(firstUpdate);
+
+        assertThat(savedBook.version())
+                .isEqualTo(firstCopy.version() + 1);
+
+        var secondUpdate = new Book(
+                secondCopy.id(),
+                secondCopy.isbn(),
+                "Second Updated Title",
+                secondCopy.author(),
+                secondCopy.price(),
+                secondCopy.publisher(),
+                secondCopy.createdDate(),
+                secondCopy.lastModifiedDate(),
+                secondCopy.version()
+        );
+
+        assertThatThrownBy(() -> bookRepository.save(secondUpdate))
+                .isInstanceOf(OptimisticLockingFailureException.class);
     }
 
 

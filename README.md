@@ -126,3 +126,15 @@ POLAR_TESTDATA_ENABLED environment variable without rebuilding
 the application.
 
 See docs/config-demo.md for the demonstration.
+
+## Practicum 2 E4: Optimistic Locking
+
+Spring Data JDBC uses the Book version field to detect conflicting updates.
+
+When two copies of the same book are loaded, saving the first copy increases
+the version stored in the database. Attempting to save the second copy with
+its outdated version causes an OptimisticLockingFailureException.
+
+BookControllerAdvice handles this exception and returns HTTP 409 Conflict.
+The repository test verifies that stale updates are rejected, and the web
+test verifies that the exception is translated into the correct HTTP response.
