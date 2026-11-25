@@ -135,4 +135,47 @@ class BookRepositoryJdbcTests {
         assertThat(actual.get().publisher()).isNull();
     }
 
+
+    @Test
+    void findBooksByAuthorWhenExisting() {
+        var book1 = Book.of(
+                "0306406152",
+                "Title One",
+                "Author One",
+                9.90,
+                null
+        );
+
+        var book2 = Book.of(
+                "9780306406157",
+                "Title Two",
+                "Author One",
+                12.90,
+                null
+        );
+
+        var book3 = Book.of(
+                "9780131103627",
+                "Title Three",
+                "Author Two",
+                15.90,
+                null
+        );
+
+        jdbcAggregateTemplate.insert(book1);
+        jdbcAggregateTemplate.insert(book2);
+        jdbcAggregateTemplate.insert(book3);
+
+        assertThat(bookRepository.findByAuthor("Author One"))
+                .extracting(Book::isbn)
+                .containsExactlyInAnyOrder(book1.isbn(), book2.isbn());
+    }
+
+    @Test
+    void findBooksByAuthorWhenNotExisting() {
+        assertThat(bookRepository.findByAuthor("Unknown Author"))
+                .isEmpty();
+    }
+
+
 }

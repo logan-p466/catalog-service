@@ -19,6 +19,10 @@ import static org.mockito.BDDMockito.given;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import java.util.List;
+
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+
 
 @WebMvcTest(BookController.class)
 public class BookControllerMvcTests {
@@ -78,5 +82,56 @@ public class BookControllerMvcTests {
                         .content(json))
                 .andExpect(status().isBadRequest());
     }
+
+
+    @Test
+    void whenGetBooksByAuthorThenShouldReturnMatchingBooks() throws Exception {
+        String author = "Author One";
+
+        var book = Book.of(
+                "0306406152",
+                "Title",
+                author,
+                9.90,
+                null
+        );
+
+        given(bookService.viewBooksByAuthor(author))
+                .willReturn(List.of(book));
+
+        mockMvc.perform(get("/books")
+                        .param("author", author))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()").value(1))
+                .andExpect(jsonPath("$[0].isbn").value(book.isbn()))
+                .andExpect(jsonPath("$[0].author").value(author));
+    }
+
+    @Test
+    void whenGetBooksByUnknownAuthorThenShouldReturnEmptyList() throws Exception {
+        String author = "Unknown Author";
+
+        given(bookService.viewBooksByAuthor(author))
+                .willReturn(List.of());
+
+        mockMvc.perform(get("/books")
+                        .param("author", author))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()").value(0));
+    }
+
+    @Test
+    void whenGetBooksWithoutAuthorThenShouldReturnAllBooks() throws Exception {
+        var book1 = Book.of("0306406152", "Title One", "Author One", 9.90, null);
+        var book2 = Book.of("9780306406157", "Title Two", "Author Two", 12.90, null);
+
+        given(bookService.viewBookList())
+                .willReturn(List.of(book1, book2));
+
+        mockMvc.perform(get("/books"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()").value(2));
+    }
+
 
 }

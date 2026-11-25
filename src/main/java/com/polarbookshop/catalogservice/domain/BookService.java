@@ -55,4 +55,8 @@ public class BookService {
                 })
                 .orElseGet(() -> addBookToCatalog(book));
     }
+
+    public Iterable<Book> viewBooksByAuthor(String author) {
+        return bookRepository.findByAuthor(author);
+    }
 }

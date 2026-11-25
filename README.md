@@ -63,3 +63,15 @@ constraint to the publisher column.
 
 This allows the database schema to evolve without requiring all application
 instances to be updated at the same time.
+
+
+## Practicum 2 E2: Search by Author
+
+The catalog supports filtering books by author through GET /books?author=....
+
+Spring Data JDBC derives the database query from the findByAuthor method in
+BookRepository. If no author is provided, the endpoint returns all books.
+If an author has no matching books, the endpoint returns an empty list
+with HTTP 200 OK.
+
+Author filtering is tested at both the repository and web layers.
