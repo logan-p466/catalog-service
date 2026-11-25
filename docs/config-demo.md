@@ -137,3 +137,13 @@ The configuration sources used in this practicum have the following precedence, 
 5. Default application.yml
 
 This demonstrates how externalized configuration allows the same application artifact to run with different configurations.
+
+## Exercise E3: Feature Flag Without Profiles
+
+The test-data loader is now controlled by the `polar.testdata.enabled` property instead of the `testdata` Spring profile.
+
+The property defaults to `false` in `application.yml`, while `bootRun` enables it through a JVM system property.
+
+The packaged JAR was started without the environment variable, and a new book was added to the catalog. After restarting the same JAR with `POLAR_TESTDATA_ENABLED=true`, the loader cleared the catalog and inserted the two sample books.
+
+This demonstrates that the feature can be enabled externally without modifying or rebuilding the JAR.

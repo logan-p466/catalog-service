@@ -20,3 +20,5 @@ spring:
 
 polar:
   greeting: Welcome to the local book catalog!
+  testdata:
+    enabled: false
